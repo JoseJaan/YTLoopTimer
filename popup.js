@@ -1,9 +1,6 @@
 // YouTube Loop Timer - Popup Script
 
-console.log('[YT Looper Popup] Script loaded');
-
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('[YT Looper Popup] DOM loaded');
   const setLoopBtn = document.getElementById('set-loop');
   const useCurrentBtn = document.getElementById('use-current');
   const disableLoopBtn = document.getElementById('disable-loop');
@@ -11,19 +8,16 @@ document.addEventListener('DOMContentLoaded', function() {
   const secondsInput = document.getElementById('seconds');
   const loopStatus = document.getElementById('loop-status');
   
-  // Format time function
   function formatTime(totalSeconds) {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }
   
-  // Send message to content script
+  // Sends a message to the content script.
   async function sendMessage(message) {
-    console.log('[YT Looper Popup] Sending message:', message);
-    
     try {
-      // Support for Firefox and Chrome
+      // This supports both Firefox (browser) and Chrome (chrome) APIs.
       const tabsAPI = typeof browser !== 'undefined' ? browser.tabs : chrome.tabs;
       
       if (!tabsAPI) {
@@ -41,11 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       });
       
-      console.log('[YT Looper Popup] Found tabs:', tabs);
-      
       if (tabs[0]) {
-        console.log('[YT Looper Popup] Sending to tab:', tabs[0].id, tabs[0].url);
-        
         return await new Promise((resolve, reject) => {
           if (typeof browser !== 'undefined' && browser.tabs) {
             browser.tabs.sendMessage(tabs[0].id, message).then(resolve).catch(reject);
@@ -55,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('[YT Looper Popup] Error sending message:', chrome.runtime.lastError);
                 reject(chrome.runtime.lastError);
               } else {
-                console.log('[YT Looper Popup] Response received:', response);
                 resolve(response);
               }
             });
@@ -71,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Check if we're on YouTube
+  // Checks if the current tab is a YouTube video page.
   async function checkYouTube() {
     try {
       const tabsAPI = typeof browser !== 'undefined' ? browser.tabs : chrome.tabs;
@@ -80,33 +69,25 @@ document.addEventListener('DOMContentLoaded', function() {
         tabsAPI.query({ active: true, currentWindow: true }, resolve);
       });
       
-      const isYouTube = tabs[0] && tabs[0].url.includes('youtube.com/watch');
-      console.log('[YT Looper Popup] YouTube check:', isYouTube, 'URL:', tabs[0]?.url);
-      return isYouTube;
+      return tabs[0] && tabs[0].url.includes('youtube.com/watch');
     } catch (error) {
       console.error('[YT Looper Popup] Error checking YouTube:', error);
       return false;
     }
   }
   
-  // Update status
+  // Updates the popup's status display.
   async function updateStatus() {
-    console.log('[YT Looper Popup] Updating status...');
-    
     const isYouTube = await checkYouTube();
     
     if (!isYouTube) {
-      console.log('[YT Looper Popup] Not on YouTube');
       loopStatus.textContent = 'Open a YouTube video';
       loopStatus.className = 'inactive';
       setButtonsEnabled(false);
       return;
     }
     
-    console.log('[YT Looper Popup] On YouTube, getting status...');
     const response = await sendMessage({ action: 'getStatus' });
-    
-    console.log('[YT Looper Popup] getStatus response:', response);
     
     if (response && !response.error) {
       if (response.isActive) {
@@ -119,14 +100,13 @@ document.addEventListener('DOMContentLoaded', function() {
       
       setButtonsEnabled(true);
     } else {
-      console.error('[YT Looper Popup] Error in response:', response);
       loopStatus.textContent = 'Connection error';
       loopStatus.className = 'inactive';
       setButtonsEnabled(false);
     }
   }
   
-  // Enable/disable buttons
+  // Enables or disables the input fields and buttons.
   function setButtonsEnabled(enabled) {
     setLoopBtn.disabled = !enabled;
     useCurrentBtn.disabled = !enabled;
@@ -135,7 +115,6 @@ document.addEventListener('DOMContentLoaded', function() {
     secondsInput.disabled = !enabled;
   }
   
-  // Event listeners
   setLoopBtn.addEventListener('click', async function() {
     const minutes = parseInt(minutesInput.value) || 0;
     const seconds = parseInt(secondsInput.value) || 0;
@@ -178,24 +157,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Input validation and dynamic behavior
+  // Input validation and dynamic behavior for the time fields.
   minutesInput.addEventListener('input', function() {
-    // Remove non-numeric characters
+    // Remove non-numeric characters.
     this.value = this.value.replace(/\D/g, '');
     
     if (this.value < 0) this.value = 0;
     if (this.value > 999) this.value = 999;
     
-    // Auto-focus seconds field when 2 digits are entered
+    // Auto-focus the seconds field when 2 digits are entered.
     if (this.value.length >= 2) {
       secondsInput.focus();
       secondsInput.select();
     }
   });
   
-  // Handle keydown for minutes input
   minutesInput.addEventListener('keydown', function(e) {
-    // Allow only numbers, backspace, delete, tab, and arrow keys
+    // Allow only numbers, backspace, delete, tab, and arrow keys.
     const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
     if (!allowedKeys.includes(e.key) && (e.key < '0' || e.key > '9')) {
       e.preventDefault();
@@ -203,35 +181,34 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   secondsInput.addEventListener('input', function() {
-    // Remove non-numeric characters
+    // Remove non-numeric characters.
     this.value = this.value.replace(/\D/g, '');
     
     if (this.value < 0) this.value = 0;
     if (this.value > 59) this.value = 59;
     
-    // Limit to 2 characters
+    // Limit to 2 characters.
     if (this.value.length > 2) {
       this.value = this.value.slice(0, 2);
     }
   });
   
-  // Handle keydown for seconds input
   secondsInput.addEventListener('keydown', function(e) {
-    // Allow only numbers, backspace, delete, tab, and arrow keys
+    // Allow only numbers, backspace, delete, tab, and arrow keys.
     const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
     if (!allowedKeys.includes(e.key) && (e.key < '0' || e.key > '9')) {
       e.preventDefault();
     }
   });
   
-  // Auto-format seconds input to always show 2 digits
+  // Auto-format the seconds input to always show 2 digits on blur.
   secondsInput.addEventListener('blur', function() {
     if (this.value && this.value.length === 1) {
       this.value = '0' + this.value;
     }
   });
   
-  // Handle backspace in seconds field - if empty, go back to minutes
+  // When backspace is pressed in an empty seconds field, focus the minutes field.
   secondsInput.addEventListener('keydown', function(e) {
     if (e.key === 'Backspace' && this.value === '' && this.selectionStart === 0) {
       minutesInput.focus();
@@ -239,7 +216,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Update status initially and every 2 seconds
+  // Update the status when the popup is opened and every 2 seconds thereafter.
   updateStatus();
   setInterval(updateStatus, 2000);
 });
+
+// Adds a listener for when the popup window is closed.
+window.addEventListener('unload', function() {
+  // Resource cleanup logic can be added here if necessary.
+});
+
+// Adds listeners to update the status when the active tab changes or is updated.
+if (typeof browser !== 'undefined' && browser.tabs) {
+  browser.tabs.onActivated.addListener(updateStatus);
+  browser.tabs.onUpdated.addListener(updateStatus);
+} else if (chrome?.tabs) {
+  chrome.tabs.onActivated.addListener(updateStatus);
+  chrome.tabs.onUpdated.addListener(updateStatus);
+}
