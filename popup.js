@@ -178,21 +178,64 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Input validation
+  // Input validation and dynamic behavior
   minutesInput.addEventListener('input', function() {
+    // Remove non-numeric characters
+    this.value = this.value.replace(/\D/g, '');
+    
     if (this.value < 0) this.value = 0;
     if (this.value > 999) this.value = 999;
+    
+    // Auto-focus seconds field when 2 digits are entered
+    if (this.value.length >= 2) {
+      secondsInput.focus();
+      secondsInput.select();
+    }
+  });
+  
+  // Handle keydown for minutes input
+  minutesInput.addEventListener('keydown', function(e) {
+    // Allow only numbers, backspace, delete, tab, and arrow keys
+    const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+    if (!allowedKeys.includes(e.key) && (e.key < '0' || e.key > '9')) {
+      e.preventDefault();
+    }
   });
   
   secondsInput.addEventListener('input', function() {
+    // Remove non-numeric characters
+    this.value = this.value.replace(/\D/g, '');
+    
     if (this.value < 0) this.value = 0;
     if (this.value > 59) this.value = 59;
+    
+    // Limit to 2 characters
+    if (this.value.length > 2) {
+      this.value = this.value.slice(0, 2);
+    }
+  });
+  
+  // Handle keydown for seconds input
+  secondsInput.addEventListener('keydown', function(e) {
+    // Allow only numbers, backspace, delete, tab, and arrow keys
+    const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+    if (!allowedKeys.includes(e.key) && (e.key < '0' || e.key > '9')) {
+      e.preventDefault();
+    }
   });
   
   // Auto-format seconds input to always show 2 digits
   secondsInput.addEventListener('blur', function() {
     if (this.value && this.value.length === 1) {
       this.value = '0' + this.value;
+    }
+  });
+  
+  // Handle backspace in seconds field - if empty, go back to minutes
+  secondsInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Backspace' && this.value === '' && this.selectionStart === 0) {
+      minutesInput.focus();
+      minutesInput.setSelectionRange(minutesInput.value.length, minutesInput.value.length);
     }
   });
   

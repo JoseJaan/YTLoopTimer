@@ -81,6 +81,13 @@ h2 {
   text-align: center;
   width: 60px;
   background: transparent;
+  -moz-appearance: textfield;
+}
+
+.time-container input::-webkit-outer-spin-button,
+.time-container input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .time-container input:disabled {

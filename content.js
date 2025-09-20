@@ -272,7 +272,6 @@ class YouTubeLooper {
       }
     }
     
-    this.showNotification(`Loop ativo: ${this.formatTime(timeInSeconds)}`);
   }
   
   getCurrentTime() {
@@ -357,37 +356,7 @@ class YouTubeLooper {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
-  
-  showNotification(message) {
-    // Remove notificação anterior se existir
-    const existing = document.getElementById('youtube-looper-notification');
-    if (existing) existing.remove();
-    
-    const notification = document.createElement('div');
-    notification.id = 'youtube-looper-notification';
-    notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #ff0000;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 5px;
-      z-index: 10000;
-      font-family: Arial, sans-serif;
-      font-size: 14px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    `;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-      if (notification.parentNode) {
-        notification.remove();
-      }
-    }, 3000);
-  }
+
   
   getStatus() {
     const status = {
