@@ -1,0 +1,36 @@
+{
+  "manifest_version": 2,
+  "name": "YouTube Loop Timer",
+  "version": "1.0",
+  "description": "Reinicia vídeos do YouTube em um tempo específico quando chegam ao fim",
+  
+  "permissions": [
+    "activeTab",
+    "storage",
+    "*://www.youtube.com/*"
+  ],
+  
+  "content_scripts": [
+    {
+      "matches": ["*://www.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "YouTube Loop Timer",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}
