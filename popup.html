@@ -6,34 +6,25 @@
 </head>
 <body>
   <div class="container">
-    <h2>YouTube Loop Timer</h2>
+    <h2>Loop Timer</h2>
     
     <div class="status" id="status">
-      <p id="video-status">Carregando...</p>
-      <p id="loop-status"></p>
+      <p id="loop-status">Loop inactive</p>
     </div>
     
     <div class="time-input">
-      <label for="minutes">Minutos:</label>
-      <input type="number" id="minutes" min="0" max="999" value="0">
-      
-      <label for="seconds">Segundos:</label>
-      <input type="number" id="seconds" min="0" max="59" value="0">
+      <label>Loop start time</label>
+      <div class="time-container">
+        <input type="number" id="minutes" min="0" max="999" value="0" placeholder="0">
+        <span class="separator">:</span>
+        <input type="number" id="seconds" min="0" max="59" value="0" placeholder="00">
+      </div>
     </div>
     
     <div class="buttons">
-      <button id="set-loop" class="btn primary">Definir Loop</button>
-      <button id="use-current" class="btn secondary">Usar Tempo Atual</button>
-      <button id="disable-loop" class="btn danger">Desativar Loop</button>
-    </div>
-    
-    <div class="info">
-      <p><strong>Como usar:</strong></p>
-      <ul>
-        <li>Defina o tempo de reinício em minutos e segundos</li>
-        <li>Ou clique em "Usar Tempo Atual" para usar a posição atual do vídeo</li>
-        <li>O vídeo reiniciará no tempo definido quando chegar ao fim</li>
-      </ul>
+      <button id="set-loop" class="btn primary">Set Loop</button>
+      <button id="use-current" class="btn secondary">Use Current Time</button>
+      <button id="disable-loop" class="btn danger">Disable Loop</button>
     </div>
   </div>
   

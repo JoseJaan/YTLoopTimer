@@ -1,35 +1,34 @@
 // YouTube Loop Timer - Popup Script
 
-console.log('[YT Looper Popup] Script carregado');
+console.log('[YT Looper Popup] Script loaded');
 
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('[YT Looper Popup] DOM carregado');
+  console.log('[YT Looper Popup] DOM loaded');
   const setLoopBtn = document.getElementById('set-loop');
   const useCurrentBtn = document.getElementById('use-current');
   const disableLoopBtn = document.getElementById('disable-loop');
   const minutesInput = document.getElementById('minutes');
   const secondsInput = document.getElementById('seconds');
-  const videoStatus = document.getElementById('video-status');
   const loopStatus = document.getElementById('loop-status');
   
-  // Função para formatar tempo
+  // Format time function
   function formatTime(totalSeconds) {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }
   
-  // Função para enviar mensagem para o content script
+  // Send message to content script
   async function sendMessage(message) {
-    console.log('[YT Looper Popup] Enviando mensagem:', message);
+    console.log('[YT Looper Popup] Sending message:', message);
     
     try {
-      // Suporte para Firefox e Chrome
+      // Support for Firefox and Chrome
       const tabsAPI = typeof browser !== 'undefined' ? browser.tabs : chrome.tabs;
       
       if (!tabsAPI) {
-        console.error('[YT Looper Popup] API de tabs não disponível');
-        return { error: 'API de tabs não disponível' };
+        console.error('[YT Looper Popup] Tabs API not available');
+        return { error: 'Tabs API not available' };
       }
       
       const tabs = await new Promise((resolve, reject) => {
@@ -42,10 +41,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       });
       
-      console.log('[YT Looper Popup] Tabs encontradas:', tabs);
+      console.log('[YT Looper Popup] Found tabs:', tabs);
       
       if (tabs[0]) {
-        console.log('[YT Looper Popup] Enviando para tab:', tabs[0].id, tabs[0].url);
+        console.log('[YT Looper Popup] Sending to tab:', tabs[0].id, tabs[0].url);
         
         return await new Promise((resolve, reject) => {
           if (typeof browser !== 'undefined' && browser.tabs) {
@@ -53,26 +52,26 @@ document.addEventListener('DOMContentLoaded', function() {
           } else if (chrome?.tabs) {
             chrome.tabs.sendMessage(tabs[0].id, message, (response) => {
               if (chrome.runtime.lastError) {
-                console.error('[YT Looper Popup] Erro ao enviar mensagem:', chrome.runtime.lastError);
+                console.error('[YT Looper Popup] Error sending message:', chrome.runtime.lastError);
                 reject(chrome.runtime.lastError);
               } else {
-                console.log('[YT Looper Popup] Resposta recebida:', response);
+                console.log('[YT Looper Popup] Response received:', response);
                 resolve(response);
               }
             });
           }
         });
       } else {
-        console.error('[YT Looper Popup] Nenhuma tab ativa encontrada');
-        return { error: 'Nenhuma tab ativa encontrada' };
+        console.error('[YT Looper Popup] No active tab found');
+        return { error: 'No active tab found' };
       }
     } catch (error) {
-      console.error('[YT Looper Popup] Erro ao enviar mensagem:', error);
-      return { error: 'Erro de comunicação: ' + error.message };
+      console.error('[YT Looper Popup] Error sending message:', error);
+      return { error: 'Communication error: ' + error.message };
     }
   }
   
-  // Função para verificar se estamos no YouTube
+  // Check if we're on YouTube
   async function checkYouTube() {
     try {
       const tabsAPI = typeof browser !== 'undefined' ? browser.tabs : chrome.tabs;
@@ -82,54 +81,52 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       
       const isYouTube = tabs[0] && tabs[0].url.includes('youtube.com/watch');
-      console.log('[YT Looper Popup] Verificação YouTube:', isYouTube, 'URL:', tabs[0]?.url);
+      console.log('[YT Looper Popup] YouTube check:', isYouTube, 'URL:', tabs[0]?.url);
       return isYouTube;
     } catch (error) {
-      console.error('[YT Looper Popup] Erro ao verificar YouTube:', error);
+      console.error('[YT Looper Popup] Error checking YouTube:', error);
       return false;
     }
   }
   
-  // Função para atualizar status
+  // Update status
   async function updateStatus() {
-    console.log('[YT Looper Popup] Atualizando status...');
+    console.log('[YT Looper Popup] Updating status...');
     
     const isYouTube = await checkYouTube();
     
     if (!isYouTube) {
-      console.log('[YT Looper Popup] Não está no YouTube');
-      videoStatus.textContent = 'Abra um vídeo do YouTube';
-      loopStatus.textContent = '';
+      console.log('[YT Looper Popup] Not on YouTube');
+      loopStatus.textContent = 'Open a YouTube video';
+      loopStatus.className = 'inactive';
       setButtonsEnabled(false);
       return;
     }
     
-    console.log('[YT Looper Popup] Está no YouTube, obtendo status...');
+    console.log('[YT Looper Popup] On YouTube, getting status...');
     const response = await sendMessage({ action: 'getStatus' });
     
-    console.log('[YT Looper Popup] Resposta do getStatus:', response);
+    console.log('[YT Looper Popup] getStatus response:', response);
     
     if (response && !response.error) {
-      videoStatus.textContent = `Tempo atual: ${formatTime(response.currentTime)}`;
-      
       if (response.isActive) {
-        loopStatus.textContent = `Loop ativo: ${formatTime(response.loopTime)}`;
+        loopStatus.textContent = `Loop active at ${formatTime(response.loopTime)}`;
         loopStatus.className = 'active';
       } else {
-        loopStatus.textContent = 'Loop inativo';
+        loopStatus.textContent = 'Loop inactive';
         loopStatus.className = 'inactive';
       }
       
       setButtonsEnabled(true);
     } else {
-      console.error('[YT Looper Popup] Erro na resposta:', response);
-      videoStatus.textContent = 'Erro ao conectar com o vídeo';
-      loopStatus.textContent = response ? response.error : 'Sem resposta';
+      console.error('[YT Looper Popup] Error in response:', response);
+      loopStatus.textContent = 'Connection error';
+      loopStatus.className = 'inactive';
       setButtonsEnabled(false);
     }
   }
   
-  // Função para habilitar/desabilitar botões
+  // Enable/disable buttons
   function setButtonsEnabled(enabled) {
     setLoopBtn.disabled = !enabled;
     useCurrentBtn.disabled = !enabled;
@@ -145,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalSeconds = minutes * 60 + seconds;
     
     if (totalSeconds < 0) {
-      alert('Por favor, insira um tempo válido');
+      alert('Please enter a valid time');
       return;
     }
     
@@ -157,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (response && response.success) {
       setTimeout(updateStatus, 100);
     } else {
-      alert('Erro ao definir o loop');
+      alert('Error setting loop');
     }
   });
   
@@ -167,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (response && response.success) {
       setTimeout(updateStatus, 100);
     } else {
-      alert('Erro ao definir o tempo atual');
+      alert('Error setting current time');
     }
   });
   
@@ -177,11 +174,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (response && response.success) {
       setTimeout(updateStatus, 100);
     } else {
-      alert('Erro ao desativar o loop');
+      alert('Error disabling loop');
     }
   });
   
-  // Validação dos inputs
+  // Input validation
   minutesInput.addEventListener('input', function() {
     if (this.value < 0) this.value = 0;
     if (this.value > 999) this.value = 999;
@@ -192,7 +189,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (this.value > 59) this.value = 59;
   });
   
-  // Atualiza status inicialmente e a cada 2 segundos
+  // Auto-format seconds input to always show 2 digits
+  secondsInput.addEventListener('blur', function() {
+    if (this.value && this.value.length === 1) {
+      this.value = '0' + this.value;
+    }
+  });
+  
+  // Update status initially and every 2 seconds
   updateStatus();
   setInterval(updateStatus, 2000);
 });
