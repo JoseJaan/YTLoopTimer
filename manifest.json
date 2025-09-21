@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "YouTube Loop Timer",
   "version": "1.0",
-  "description": "Reinicia vídeos do YouTube em um tempo específico quando chegam ao fim",
+  "description": "Restart YouTube videos at a specific time when they reach the end",
   
   "permissions": [
     "activeTab",
