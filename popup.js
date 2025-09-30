@@ -1,5 +1,3 @@
-// YouTube Loop Timer - Popup Script
-
 document.addEventListener('DOMContentLoaded', function() {
   const setLoopBtn = document.getElementById('set-loop');
   const useCurrentBtn = document.getElementById('use-current');
