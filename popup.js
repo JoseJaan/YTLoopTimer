@@ -14,10 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }
   
-  // Sends a message to the content script.
   async function sendMessage(message) {
     try {
-      // This supports both Firefox (browser) and Chrome (chrome) APIs.
       const tabsAPI = typeof browser !== 'undefined' ? browser.tabs : chrome.tabs;
       
       if (!tabsAPI) {
@@ -60,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Checks if the current tab is a YouTube video page.
+  //Checks if the current tab is a YouTube video page.
   async function checkYouTube() {
     try {
       const tabsAPI = typeof browser !== 'undefined' ? browser.tabs : chrome.tabs;
@@ -76,7 +74,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Updates the popup's status display.
   async function updateStatus() {
     const isYouTube = await checkYouTube();
     
@@ -106,7 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Enables or disables the input fields and buttons.
   function setButtonsEnabled(enabled) {
     setLoopBtn.disabled = !enabled;
     useCurrentBtn.disabled = !enabled;
@@ -157,15 +153,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Input validation and dynamic behavior for the time fields.
+  //Input validation and dynamic behavior for the time fields.
   minutesInput.addEventListener('input', function() {
-    // Remove non-numeric characters.
     this.value = this.value.replace(/\D/g, '');
     
     if (this.value < 0) this.value = 0;
     if (this.value > 999) this.value = 999;
     
-    // Auto-focus the seconds field when 2 digits are entered.
     if (this.value.length >= 2) {
       secondsInput.focus();
       secondsInput.select();
@@ -173,7 +167,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   minutesInput.addEventListener('keydown', function(e) {
-    // Allow only numbers, backspace, delete, tab, and arrow keys.
     const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
     if (!allowedKeys.includes(e.key) && (e.key < '0' || e.key > '9')) {
       e.preventDefault();
@@ -181,34 +174,29 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   secondsInput.addEventListener('input', function() {
-    // Remove non-numeric characters.
     this.value = this.value.replace(/\D/g, '');
     
     if (this.value < 0) this.value = 0;
     if (this.value > 59) this.value = 59;
     
-    // Limit to 2 characters.
     if (this.value.length > 2) {
       this.value = this.value.slice(0, 2);
     }
   });
   
   secondsInput.addEventListener('keydown', function(e) {
-    // Allow only numbers, backspace, delete, tab, and arrow keys.
     const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
     if (!allowedKeys.includes(e.key) && (e.key < '0' || e.key > '9')) {
       e.preventDefault();
     }
   });
   
-  // Auto-format the seconds input to always show 2 digits on blur.
   secondsInput.addEventListener('blur', function() {
     if (this.value && this.value.length === 1) {
       this.value = '0' + this.value;
     }
   });
   
-  // When backspace is pressed in an empty seconds field, focus the minutes field.
   secondsInput.addEventListener('keydown', function(e) {
     if (e.key === 'Backspace' && this.value === '' && this.selectionStart === 0) {
       minutesInput.focus();
@@ -216,17 +204,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Update the status when the popup is opened and every 2 seconds thereafter.
   updateStatus();
   setInterval(updateStatus, 2000);
 });
 
-// Adds a listener for when the popup window is closed.
 window.addEventListener('unload', function() {
-  // Resource cleanup logic can be added here if necessary.
 });
 
-// Adds listeners to update the status when the active tab changes or is updated.
 if (typeof browser !== 'undefined' && browser.tabs) {
   browser.tabs.onActivated.addListener(updateStatus);
   browser.tabs.onUpdated.addListener(updateStatus);

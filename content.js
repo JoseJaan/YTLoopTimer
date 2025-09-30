@@ -1,5 +1,3 @@
-// YouTube Loop Timer - Content Script
-
 class YouTubeLooper {
   constructor() {
     this.video = null;
@@ -14,8 +12,7 @@ class YouTubeLooper {
   }
   
   init() {
-    // The 'DOMContentLoaded' event fires when the initial HTML document has been completely loaded and parsed,
-    // without waiting for stylesheets, images, and subframes to finish loading.
+    //The 'DOMContentLoaded' event fires when the initial HTML document has been completely loaded and parsed
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
         this.setupLooper();
@@ -24,14 +21,12 @@ class YouTubeLooper {
       this.setupLooper();
     }
     
-    // YouTube uses a single-page application (SPA) architecture.
-    // A MutationObserver is used to detect page changes and re-initialize the looper.
     let lastUrl = location.href;
     new MutationObserver(() => {
       const url = location.href;
       if (url !== lastUrl) {
         lastUrl = url;
-        // Reset state when the video changes
+        //Reset state when the video changes
         this.eventListenerAdded = false;
         this.currentVideoId = null;
         setTimeout(() => {
@@ -49,7 +44,7 @@ class YouTubeLooper {
         this.addVideoEventListeners();
         this.loadSavedSettings();
       } else if (!this.video) {
-        setTimeout(checkForVideo, 1000); // Retry if video element is not found
+        setTimeout(checkForVideo, 1000); //Retry if video element is not found
       }
     };
     
@@ -61,7 +56,7 @@ class YouTubeLooper {
       return;
     }
     
-    // Remove previous listeners if they exist to avoid duplicates
+    //Remove previous listeners if they exist to avoid duplicates
     if (this.timeUpdateHandler) {
       this.video.removeEventListener('timeupdate', this.timeUpdateHandler);
     }
@@ -69,24 +64,21 @@ class YouTubeLooper {
       this.video.removeEventListener('ended', this.endedHandler);
     }
     
-    // The 'timeupdate' event is fired when the time indicated by the currentTime attribute has been updated.
-    // This is used to preemptively restart the loop before the video ends.
+    //The 'timeupdate' event is fired when the time indicated by the currentTime attribute has been updated.
+    //This is used to preemptively restart the loop before the video ends.
     this.timeUpdateHandler = () => {
       if (this.isLoopActive && this.video) {
         const currentTime = this.video.currentTime;
         const duration = this.video.duration;
         
-        // If the video is very close to the end (0.5 seconds), restart it.
         if (duration - currentTime <= 0.5 && currentTime > 0) {
           this.restartAtLoopTime();
         }
       }
     };
     
-    // The 'ended' event is a fallback mechanism in case the 'timeupdate' event fails to fire at the end of the video.
     this.endedHandler = () => {
       if (this.isLoopActive) {
-        // A small delay is added to prevent potential race conditions.
         setTimeout(() => {
           this.restartAtLoopTime();
         }, 100);
@@ -104,24 +96,21 @@ class YouTubeLooper {
       return;
     }
     
-    // Ensure that we are still on the same video before restarting.
     const currentVideoId = this.getVideoId();
     if (this.currentVideoId && currentVideoId !== this.currentVideoId) {
       return;
     }
     
     try {
-      // Prevent YouTube's autoplay feature from moving to the next video.
+      //Prevent YouTube's autoplay feature from moving to the next video.
       this.preventAutoplay();
       
       this.video.currentTime = this.loopStartTime;
       
-      // Ensure the video continues to play after seeking.
       const playPromise = this.video.play();
       
       if (playPromise !== undefined) {
         playPromise.catch(error => {
-          // Retry playing after a short delay if the first attempt fails.
           setTimeout(() => {
             this.video.play().catch(e => {
               console.error('[YT Looper] Second error on play:', e);
@@ -134,21 +123,21 @@ class YouTubeLooper {
     }
   }
   
-  // This function attempts to disable YouTube's autoplay feature through various methods.
+  //This function attempts to disable YouTube autoplay feature through various methods.
   preventAutoplay() {
     try {
-      // Method 1: Click the autoplay toggle button if it's active.
+      //Click the autoplay toggle button if its active.
       const autoplayButton = document.querySelector('[data-tooltip-target-id="ytp-autonav-toggle-button"]');
       if (autoplayButton && autoplayButton.getAttribute('aria-pressed') === 'true') {
         autoplayButton.click();
       }
       
-      // Method 2: Use the internal YouTube player API if available.
+      //Use the internal YouTube player API if available.
       if (window.ytplayer && window.ytplayer.config && window.ytplayer.config.args) {
         window.ytplayer.config.args.autoplay = '0';
       }
       
-      // Method 3: Remove the 'autoplay' parameter from the URL.
+      // Remove the autoplay parameter from the URL.
       const url = new URL(window.location.href);
       if (url.searchParams.has('autoplay')) {
         url.searchParams.set('autoplay', '0');
@@ -162,7 +151,7 @@ class YouTubeLooper {
   setLoopTime(timeInSeconds) {
     this.loopStartTime = timeInSeconds;
     this.isLoopActive = true;
-    this.currentVideoId = this.getVideoId(); // Save the ID of the current video
+    this.currentVideoId = this.getVideoId();
     
     const videoId = this.getVideoId();
     
@@ -174,7 +163,6 @@ class YouTubeLooper {
         }
       };
       
-      // Use browser.storage for Firefox and chrome.storage for Chrome.
       if (typeof browser !== 'undefined' && browser.storage) {
         browser.storage.local.set(data).catch(error => {
           console.error('[YT Looper] Error saving data:', error);
@@ -268,7 +256,6 @@ class YouTubeLooper {
 
 const youtubeLooper = new YouTubeLooper();
 
-// Communication with the popup script
 const runtimeAPI = typeof browser !== 'undefined' ? browser.runtime : chrome.runtime;
 
 if (runtimeAPI && runtimeAPI.onMessage) {
@@ -298,7 +285,7 @@ if (runtimeAPI && runtimeAPI.onMessage) {
         sendResponse({ error: 'Unrecognized action' });
     }
     
-    return true; // Indicates that the response is sent asynchronously.
+    return true; 
   });
 } else {
   console.error('[YT Looper] Runtime API not available');
